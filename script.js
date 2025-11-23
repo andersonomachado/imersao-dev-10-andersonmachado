@@ -21,6 +21,11 @@ document.addEventListener('DOMContentLoaded', () => {
         campoBusca.focus(); // Coloca o foco de volta no campo de busca
     });
 
+    // Função para normalizar strings (remover acentos e converter para minúsculas)
+    function normalizarString(str) {
+        if (!str) return '';
+        return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+    }
 
     // Função para criar e exibir os cards
     function exibirCards(listaMadeiras) {
@@ -49,14 +54,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Função para lidar com a busca
     function buscar() {
-        const termoBusca = campoBusca.value.toLowerCase();
+        const termoBusca = normalizarString(campoBusca.value.trim());
+        if (termoBusca === '') {
+            cardContainer.innerHTML = ''; // Limpa os resultados se a busca estiver vazia
+            return;
+        }
         const resultado = madeiras.filter(madeira => 
-            madeira.nome_comercial.toLowerCase().includes(termoBusca) ||
-            madeira.nome_cientifico.toLowerCase().includes(termoBusca)
+            normalizarString(madeira.nome_comercial).includes(termoBusca) ||
+            normalizarString(madeira.nome_cientifico).includes(termoBusca) ||
+            normalizarString(madeira.origem).includes(termoBusca)
         );
         exibirCards(resultado);
     }
 
-    botaoBusca.addEventListener('click', buscar);
-    campoBusca.addEventListener('keyup', (event) => event.key === 'Enter' && buscar());
+    // A busca agora é acionada enquanto o usuário digita
+    campoBusca.addEventListener('input', buscar);
 });
